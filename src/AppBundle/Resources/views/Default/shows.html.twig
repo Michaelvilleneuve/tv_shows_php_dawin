@@ -16,6 +16,10 @@
     		{% endfor %}
             </div>
 
+            <a href="{{ path('shows', {page: next_page}) }}">
+                Page suivante
+            </a>
+
     		{% if app.user %}
     			<a href="{{ path('admin_add_show') }}">Ajouter une série</a>
     		{% endif %}

@@ -6,6 +6,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class DefaultController extends Controller
 {
@@ -22,14 +23,29 @@ class DefaultController extends Controller
      * @Route("/shows", name="shows")
      * @Template()
      */
-    public function showsAction()
+    public function showsAction(Request $request)
     {
         $em = $this->get('doctrine')->getManager();
-        $repo = $em->getRepository('AppBundle:TVShow');
+        $dql   = "SELECT a FROM AppBundle:TVShow a";
+        $query = $em->createQuery($dql);
 
-        return [
-            'shows' => $repo->findAll()
-        ];
+        $page = $request->query->getInt('page', 1);
+        $paginator  = $this->get('knp_paginator');
+        $shows = $paginator->paginate(
+            $query,
+            $page,
+            10
+        );
+
+        if($request->isXmlHttpRequest()) {
+            return new JsonResponse(array('shows' => $shows));
+        } else {
+            return [
+                'shows' => $shows,
+                'next_page' => $page+1
+            ];
+        }
+
     }
 
     /**
