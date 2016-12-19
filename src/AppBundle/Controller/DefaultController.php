@@ -63,4 +63,36 @@ class DefaultController extends Controller
     {
         return [];
     }
+
+    /**
+     * @Route("/search", name="search")
+     * @Template()
+     */
+    public function searchAction(Request $request)
+    {
+        $search_data = $request->request->get('search');
+
+        $em = $this->get('doctrine')->getManager();
+
+        $show_bd = $em->getRepository('AppBundle:TVShow');
+        $episode_bd = $em->getRepository('AppBundle:Episode');
+
+        $episodes = $episode_bd->createQueryBuilder('ep')
+                                ->where('ep.name LIKE :name')
+                                ->setParameter('name',"%$search_data%")
+                                ->getQuery()
+                                ->getResult();
+
+        $shows = $show_bd->createQueryBuilder('sh')
+                                ->where('sh.name LIKE :name')
+                                ->setParameter('name',"%$search_data%")
+                                ->getQuery()
+                                ->getResult();
+
+        return [
+            'shows' => $shows,
+            'episodes' => $episodes,
+            'search_data' => $search_data
+        ];
+    }
 }

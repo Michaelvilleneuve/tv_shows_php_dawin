@@ -1,0 +1,48 @@
+{% extends 'AppBundle::layout.html.twig' %}
+
+{% block menu_shows %}active{% endblock %}
+
+{% block contents %}
+
+	<section class="text-center">
+		<div class="container">
+			<h1>Résultat de la recherche : "{{ search_data }}"</h1>
+			<hr>
+			<div class="text-left">	
+				{% if episodes|length > 0 %}
+				<strong>Épisodes correspondants à votre recherche : </strong>
+				<br><br>
+				<ul class="list-group">
+					{% for episode in episodes %}
+					<li class="list-group-item">
+                        {{ episode.season.show }} - Saison {{ episode.season.number }} - N°{{ episode.number }} - {{ episode }} - Sorti le {{ episode.date|date('d/m/y') }}
+
+						<a href="{{ path('show', {id: episode.season.show.id}) }}" class="pull-right">Voir la fiche de la série</a>
+					</li>
+					{% endfor %}
+				</ul>
+
+				<br>
+				{% else %}
+					<strong>Pas d'épisodes correspondants à votre recherche...</strong>
+					<br>
+				{% endif %}
+
+
+				{% if shows|length > 0 %}
+					<strong>Séries correspondantes à votre recherche : </strong>
+					<br><br>
+					<ul class="list-group">
+						{% for show in shows %}
+						<li class="list-group-item">{{ show }}
+							<a href="{{ path('show', {id: show.id}) }}" class="pull-right">Voir la fiche de la série</a>
+						</li>
+						{% endfor %}
+					</ul>
+				{% else %}
+					<strong>Pas de séries correspondantes à votre recherche...</strong>
+				{% endif %}
+			</div>
+		</div>
+	</section>
+{% endblock %}
