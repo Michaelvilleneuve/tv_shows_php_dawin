@@ -15,7 +15,9 @@
                 {{ show.synopsis }}
                 {% for season in show.seasons %}
                     <h4>Saison {{ season }}
-                        <a href="{{ path('admin_delete_season', {id: season.id}) }}" class="alert-danger">Supprimer</a>
+                        {% if app.user %}
+                            <a href="{{ path('admin_delete_season', {id: season.id}) }}" class="alert-danger">Supprimer</a>
+                        {% endif %}
                     </h4>
                     {% for episode in season.episodes %}
                         {{ episode.number }} - {{ episode }} - Sorti le {{ episode.date|date('d/m/y') }}
