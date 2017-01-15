@@ -4,8 +4,21 @@
 
 {% block contents %}
     <section>
-    	<div class="container">
-    		
+    	<div class="container" style="padding-top: 40px">
+    		{% for episode in episodes %}
+                <div class="col-xs-6" style="margin-bottom: 20px">
+                    <div class="col-xs-6">
+                        <img src="{{ web_image('uploads/'~episode.season.show.image).resize(200, 200).png }}" />
+                    </div>
+
+                    <div class="col-xs-6">
+                        <h3>{{ episode.season.show }}</h3>
+                        <strong>Saison n°{{ episode.season }} - épisode {{ episode.number }}</strong>
+                        <br/>
+                        <em>Sortie prévue le {{ episode.date|date('d/m/y') }}</em>
+                    </div>
+                </div>
+            {% endfor %}
     	</div>
     </section>
 {% endblock %}
