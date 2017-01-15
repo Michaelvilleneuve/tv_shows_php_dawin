@@ -167,4 +167,28 @@ class AdminController extends Controller
             'result' => $result
         ];
     }
+
+    /**
+     * @Route("/import_omdb/{id}", name="admin_import_omdb")
+     * @Template()
+     */
+    public function omdbImport($id, Request $request)
+    {
+        $omdb = new OMDbAPI();
+        $result = $omdb->fetch('i', $id);
+        if($result->code === 200) {
+            $show = new TVShow;
+            $show->setName($result->data->Title);
+            $show->setSynopsis($result->data->Plot);
+            $show->setImage($result->data->Poster);
+
+            $em = $this->get('doctrine')->getManager();
+            $em->persist($show);
+            $em->flush();
+        }
+
+        return [
+            'result' => $result
+        ];
+    }
 }
