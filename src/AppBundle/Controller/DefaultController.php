@@ -30,6 +30,7 @@ class DefaultController extends Controller
         $query = $em->createQuery($dql);
 
         $page = $request->query->getInt('page', 1);
+        
         $paginator  = $this->get('knp_paginator');
         $shows = $paginator->paginate(
             $query,
@@ -37,14 +38,16 @@ class DefaultController extends Controller
             10
         );
 
-        if($request->isXmlHttpRequest()) {
-            return new JsonResponse(array('shows' => $shows));
-        } else {
-            return [
-                'shows' => $shows,
-                'next_page' => $page+1
-            ];
-        }
+        $next_page = count($paginator->paginate($query, $page + 1, 10));
+        $next_page = ($next_page) ? $page + 1 : false;
+
+        $previous_page = $page - 1;
+        
+        return [
+            'shows' => $shows,
+            'next_page' => $next_page,
+            'previous_page' => $previous_page
+        ];
 
     }
 
