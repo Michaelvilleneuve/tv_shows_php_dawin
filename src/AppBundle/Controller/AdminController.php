@@ -178,26 +178,54 @@ class AdminController extends Controller
         $result = $omdb->fetch('i', $id);
 
         if($result->code === 200) {
+
             $show = new TVShow;
-            $show->setName($result->data->Title);
-            $show->setSynopsis($result->data->Plot);
+
+            $show->setName($result->data->Title)
+                 ->setSynopsis($result->data->Plot);
+
+            // Import poster
             $file = file_get_contents($result->data->Poster);
-        		if ($file) {
-        			$filename = md5(uniqid()).'.jpg';
-        			$webRoot = $this->get('kernel')->getRootDir().'/../web/uploads/';
+            if ($file) {
+             $filename = md5(uniqid()).'.jpg';
+             $webRoot = $this->get('kernel')->getRootDir().'/../web/uploads/';
 
-              $fp = fopen($webRoot.$filename,"wb");
-              fwrite($fp,$file);
-              fclose($fp);
+             $fp = fopen($webRoot.$filename,"wb");
+             fwrite($fp,$file);
+             fclose($fp);
 
-        			$show->setImage($filename);
-        		}
+             $show->setImage($filename);
+            }
 
             $em = $this->get('doctrine')->getManager();
             $em->persist($show);
-            $em->flush();
 
+            print_r($result);
+            // Import seasons
+            for ($i = 1; $i <= $result->data->totalSeasons; $i++) {
+               $fetchedSeason = $omdb->fetch('i', $id, ['Season' => $i])->data;
+               $season = new Season;
+               $season->setShow($show)->setNumber($i);
+               $em->persist($season);
+
+               if (property_exists($fetchedSeason, 'Episodes')) {
+                 // Import episode
+                 foreach ($fetchedSeason->Episodes as $fetchedEpisode) {
+                   $date = strtotime($fetchedEpisode->Released) ? new \DateTime($fetchedEpisode->Released) : null;
+                   $episode = new Episode;
+                   $episode->setSeason($season)
+                   ->setDate($date)
+                   ->setName($fetchedEpisode->Title)
+                   ->setNumber($fetchedEpisode->Episode);
+
+                   $em->persist($episode);
+                 }
+               }
+            }
+
+            $em->flush();
             return $this->redirect($this->generateUrl('show', ['id' => $show->getId()]));
         }
+        return $this->redirect($this->generateUrl('homepage'));
     }
 }
