@@ -176,19 +176,28 @@ class AdminController extends Controller
     {
         $omdb = new OMDbAPI();
         $result = $omdb->fetch('i', $id);
+
         if($result->code === 200) {
             $show = new TVShow;
             $show->setName($result->data->Title);
             $show->setSynopsis($result->data->Plot);
-            $show->setImage($result->data->Poster);
+            $file = file_get_contents($result->data->Poster);
+        		if ($file) {
+        			$filename = md5(uniqid()).'.jpg';
+        			$webRoot = $this->get('kernel')->getRootDir().'/../web/uploads/';
+
+              $fp = fopen($webRoot.$filename,"wb");
+              fwrite($fp,$file);
+              fclose($fp);
+
+        			$show->setImage($filename);
+        		}
 
             $em = $this->get('doctrine')->getManager();
             $em->persist($show);
             $em->flush();
-        }
 
-        return [
-            'result' => $result
-        ];
+            return $this->redirect($this->generateUrl('show', ['id' => $show->getId()]));
+        }
     }
 }
